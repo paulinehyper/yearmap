@@ -89,7 +89,8 @@ class SignInDemoState extends State<SignInDemo> {
     );
     if (response.statusCode != 200) {
       setState(() {
-        _contactText = "People API gave a ${response.statusCode} "
+        _contactText =
+            "People API gave a ${response.statusCode} and currentUser is${_currentUser.email}}"
             "response. Check logs for details.";
       });
       print('People API ${response.statusCode} response: ${response.body}');
