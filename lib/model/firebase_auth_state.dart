@@ -1,16 +1,75 @@
-import 'dart:html';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:yearmap/repo/user_network_repository.dart';
+import 'package:yearmap/utils/simple_snackbar.dart';
 
 class FirebaseAuthState extends ChangeNotifier {
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseAuthStatus _firebaseAuthStatus = FirebaseAuthStatus.signout;
   User _firebaseUser;
 
+  FacebookLogin _facebookLogin;
   GoogleSignIn _googleSignIn;
+
+  void login(BuildContext context,
+      {@required String email, @required String password}) async {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+    UserCredential authResult = await _firebaseAuth
+        .signInWithEmailAndPassword(
+            email: email.trim(), password: password.trim())
+        .catchError((error) {
+      print(error);
+      String _message = "";
+      switch (error.code) {
+        case 'ERROR_INVALID_EMAIL':
+          _message = "멜주고 고쳐!";
+          break;
+        case 'ERROR_WRONG_PASSWORD':
+          _message = "비번 이상";
+          break;
+        case 'ERROR_USER_NOT_FOUND':
+          _message = "유저 없는데?";
+          break;
+        case 'ERROR_USER_DISABLED':
+          _message = "해당 유저 금지되";
+          break;
+        case 'ERROR_TOO_MANY_REQUESTS':
+          _message = "너무 많이 시도하는데?? 나중에 다시 해봐~~~";
+          break;
+        case 'ERROR_OPERATION_NOT_ALLOWED':
+          _message = "해당 동작은 여기서는 금지야!!";
+          break;
+      }
+
+      SnackBar snackBar = SnackBar(
+        content: Text(_message),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+
+    _firebaseUser = authResult.user;
+    if (_firebaseUser == null) {
+      SnackBar snackBar = SnackBar(
+        content: Text("Please try again later!"),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    }
+  }
+
+  void signOut() async {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+    _firebaseAuthStatus = FirebaseAuthStatus.signout;
+    if (_firebaseUser != null) {
+      _firebaseUser = null;
+      if (await _facebookLogin.isLoggedIn) {
+        await _facebookLogin.logOut();
+      }
+      await _firebaseAuth.signOut();
+    }
+    notifyListeners();
+  }
 
   void watchAuthChange() {
     _firebaseAuth.authStateChanges().listen((firebaseUser) {
@@ -22,6 +81,43 @@ class FirebaseAuthState extends ChangeNotifier {
         changeFirebaseAuthStatus();
       }
     });
+  }
+
+  void loginWithFacebook(BuildContext context) async {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+
+    if (_facebookLogin == null) _facebookLogin = FacebookLogin();
+    final result = await _facebookLogin.logIn(['email']);
+
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        _handleFacebookTokenWithFirebase(context, result.accessToken.token);
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+        simpleSnackbar(context, 'User cancel facebook sign in');
+        break;
+      case FacebookLoginStatus.error:
+        simpleSnackbar(context, '페북 로그인하는데 에러나떵~');
+        _facebookLogin.logOut();
+        break;
+    }
+  }
+
+  void _handleFacebookTokenWithFirebase(
+      BuildContext context, String token) async {
+    final AuthCredential credential = FacebookAuthProvider.credential(token);
+
+    final UserCredential authResult =
+        await _firebaseAuth.signInWithCredential(credential);
+
+    _firebaseUser = authResult.user;
+    if (_firebaseUser == null) {
+      simpleSnackbar(context, '페북 로그인이 잘 안되떵~ 나중에 다시해봥~');
+    } else {
+      await userNetworkRepository.attemptCreateUser(
+          userKey: _firebaseUser.uid, email: _firebaseUser.email);
+    }
+    notifyListeners();
   }
 
   void registerUser(BuildContext context,
@@ -76,6 +172,9 @@ class FirebaseAuthState extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  FirebaseAuthStatus get firebaseAuthStatus => _firebaseAuthStatus;
+  User get firebaseUser => _firebaseUser;
 }
 
 enum FirebaseAuthStatus { signout, progress, signin }
