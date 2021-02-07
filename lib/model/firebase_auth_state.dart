@@ -11,11 +11,18 @@ class FirebaseAuthState extends ChangeNotifier {
   User _firebaseUser;
 
   FacebookLogin _facebookLogin;
-  GoogleSignIn _googleSignIn;
+
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   void login(BuildContext context,
       {@required String email, @required String password}) async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+
     UserCredential authResult = await _firebaseAuth
         .signInWithEmailAndPassword(
             email: email.trim(), password: password.trim())
@@ -83,6 +90,30 @@ class FirebaseAuthState extends ChangeNotifier {
     });
   }
 
+  void loginWithGoogle(BuildContext context) async {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+
+    if (_googleSignIn == null) _googleSignIn = GoogleSignIn();
+
+    try {
+      await _googleSignIn.signIn().then((result) {
+        result.authentication.then((googleKey) {
+          //googleKey.accessToken;
+          print(googleKey.accessToken);
+          //googleKey.idToken;
+          print(googleKey.idToken);
+          print(_googleSignIn.currentUser.displayName);
+        }).catchError((err) {
+          print('inner error');
+        });
+      }).catchError((err) {
+        print('error occured');
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
+
   void loginWithFacebook(BuildContext context) async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
 
@@ -103,6 +134,22 @@ class FirebaseAuthState extends ChangeNotifier {
     }
   }
 
+  void _handleGoogleTokenWithFirebase(
+      BuildContext context, String accessToken, String idToken) async {
+    final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: accessToken, idToken: idToken);
+    final UserCredential authResult =
+        await _firebaseAuth.signInWithCredential(credential);
+    _firebaseUser = authResult.user;
+    if (_firebaseUser == null) {
+      simpleSnackbar(context, '페북 로그인이 잘 안되떵~ 나중에 다시해봥~');
+    } else {
+      await userNetworkRepository.attemptCreateUser(
+          userKey: _firebaseUser.uid, email: _firebaseUser.email);
+    }
+    notifyListeners();
+  }
+
   void _handleFacebookTokenWithFirebase(
       BuildContext context, String token) async {
     final AuthCredential credential = FacebookAuthProvider.credential(token);
@@ -120,9 +167,29 @@ class FirebaseAuthState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void handleGoogleTokenWithFirebase(
+      BuildContext context, String accessToken, String idToken) async {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+    final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: accessToken, idToken: idToken);
+
+    final UserCredential authResult =
+        await _firebaseAuth.signInWithCredential(credential);
+
+    _firebaseUser = authResult.user;
+    if (_firebaseUser == null) {
+      simpleSnackbar(context, '페북 로그인이 잘 안되떵~ 나중에 다시해봥~');
+    } else {
+      await userNetworkRepository.attemptCreateUser(
+          userKey: _firebaseUser.uid, email: _firebaseUser.email);
+    }
+    notifyListeners();
+  }
+
   void registerUser(BuildContext context,
       {@required String email, @required String password}) async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+
     UserCredential authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
             email: email.trim(), password: password.trim())
@@ -154,6 +221,7 @@ class FirebaseAuthState extends ChangeNotifier {
       );
       Scaffold.of(context).showSnackBar(snackBar);
     } else {
+      //사용자등록(registerUser) 후--> firestore에 Users collection에 자료 생성.
       await userNetworkRepository.attemptCreateUser(
           userKey: _firebaseUser.uid, email: _firebaseUser.email);
     }

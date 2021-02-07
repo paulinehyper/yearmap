@@ -94,6 +94,9 @@ class _AppState extends State<App> {
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:yearmap/screen/googlesignin.dart';
+import 'package:yearmap/screen/homescreen.dart';
+import 'package:yearmap/widget/signin_demo.dart';
 import 'package:yearmap/widget/sign_up_form.dart';
 
 import 'model/firebase_auth_state.dart';
@@ -105,7 +108,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(name: 'The YearMap'); //firebase core 임포트 해줘야 해.
+  await Firebase.initializeApp(); //firebase core 임포트 해줘야 해.
 
   //initializeApp();
   runApp(MyApp());
@@ -131,14 +134,15 @@ class MyApp extends StatelessWidget {
           switch (firebaseAuthState.firebaseAuthStatus) {
             case FirebaseAuthStatus.signout:
               _clearUserModel(context);
-              _currentWidget = AuthScreen();
+              _currentWidget = HomeScreen();
+
               break;
             case FirebaseAuthStatus.signin:
               _initUserModel(firebaseAuthState, context);
-              _currentWidget = AuthScreen();
+              _currentWidget = HomeScreen();
               break;
             default:
-              _currentWidget = AuthScreen();
+              _currentWidget = SignInDemo();
           }
 
           return AnimatedSwitcher(
