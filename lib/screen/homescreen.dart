@@ -17,15 +17,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 height: 100,
               ),
-              ListTile(
-                leading: Text('leading'),
-                title: Text('title'),
-                trailing: Text('hi'),
-              ),
-              Container(
-                color: Colors.yellow,
-                child: Text('data'),
-              ),
+              Container(color: Colors.yellow)
             ],
           ),
         ),

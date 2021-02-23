@@ -96,6 +96,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yearmap/screen/googlesignin.dart';
 import 'package:yearmap/screen/homescreen.dart';
+import 'package:yearmap/screen/test.dart';
 import 'package:yearmap/widget/signin_demo.dart';
 import 'package:yearmap/widget/sign_up_form.dart';
 
@@ -129,27 +130,36 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        home: Consumer<FirebaseAuthState>(builder: (BuildContext context,
-            FirebaseAuthState firebaseAuthState, Widget child) {
-          switch (firebaseAuthState.firebaseAuthStatus) {
-            case FirebaseAuthStatus.signout:
-              _clearUserModel(context);
-              _currentWidget = HomeScreen();
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Consumer<FirebaseAuthState>(builder: (BuildContext context,
+              FirebaseAuthState firebaseAuthState, Widget child) {
+            switch (firebaseAuthState.firebaseAuthStatus) {
+              case FirebaseAuthStatus.signout:
+                _clearUserModel(context);
+                _currentWidget = Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Test(),
+                );
 
-              break;
-            case FirebaseAuthStatus.signin:
-              _initUserModel(firebaseAuthState, context);
-              _currentWidget = HomeScreen();
-              break;
-            default:
-              _currentWidget = SignInDemo();
-          }
+                break;
+              case FirebaseAuthStatus.signin:
+                _initUserModel(firebaseAuthState, context);
+                _currentWidget = Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Test(),
+                );
+                break;
+              default:
+                _currentWidget = SignInDemo();
+            }
 
-          return AnimatedSwitcher(
-            duration: Duration(milliseconds: 300),
-            child: _currentWidget,
-          );
-        }),
+            return AnimatedSwitcher(
+              duration: Duration(milliseconds: 300),
+              child: _currentWidget,
+            );
+          }),
+        ),
         //theme: ThemeData(primarySwatch: Colors.white),
       ),
     );
