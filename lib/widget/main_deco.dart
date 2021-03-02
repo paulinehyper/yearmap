@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:yearmap/widget/yearbartile.dart';
+import 'file:///Users/paulinekoh/workspace/yearmap/test/yearbartile.dart';
 
 //2021.02.23
 class MainDeco extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double _calendariconWidth = MediaQuery.of(context).size.width / 13;
+    double _fromNowCalendarWidth = _calendariconWidth;
+    double _pastCalendarWidth = _fromNowCalendarWidth * 1.0;
+
     double _fontSize = _calendariconWidth / 2.8;
+
+    DateTime _nowDateTime = DateTime.now();
+    int _monthNow = _nowDateTime.month;
 
     return Stack(
       children: [
@@ -18,14 +24,22 @@ class MainDeco extends StatelessWidget {
                 Stack(
                   alignment: Alignment.topCenter,
                   children: [
-                    Image.asset(
-                      'assets/images/cals.png',
-                      width: _calendariconWidth,
-                    ),
+                    _monthNow <= (i + 1)
+                        ? Image.asset(
+                            'assets/images/cali.png',
+                            fit: BoxFit.contain,
+                            width: _fromNowCalendarWidth,
+                          )
+                        : Image.asset(
+                            'assets/images/unselectedcali.png',
+                            width: _pastCalendarWidth,
+                          ),
                     Text(
                       '\n${i + 1}',
-                      style:
-                          TextStyle(color: Colors.white, fontSize: _fontSize),
+                      style: _monthNow > (i + 1)
+                          ? TextStyle(
+                              color: Colors.white54, fontSize: _fontSize * 0.9)
+                          : TextStyle(color: Colors.white, fontSize: _fontSize),
                     ),
                   ],
                 )
@@ -38,29 +52,6 @@ class MainDeco extends StatelessWidget {
           left: 100 + MediaQuery.of(context).size.width / 13 * 10,
         )
       ],
-    )
-
-        /*
-        Positioned(
-          child: AnimatedContainer(
-            width: (MediaQuery.of(context).size.width) / 12 * 4,
-            height: MediaQuery.of(context).size.height / 25,
-            //color: Colors.amber,
-            decoration: BoxDecoration(
-                color: Colors.blue, borderRadius: BorderRadius.circular(10.0)),
-            duration: Duration(milliseconds: 500),
-          ),
-          top: 60,
-          left: 100,
-          //start: 100,
-
-          // height: MediaQuery.of(context).size.height / 25,
-          // height: ,
-          // width: (MediaQuery.of(context).size.width) / 12 * _duration,
-          //child: BoxDecoration(borderRadius: BorderRadius.circular(10.0),color: Colors.amber),
-          //color: Colors.pink,
-        )*/
-
-        ;
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//not using! 2021.02.24
 class YearBarTile extends StatelessWidget {
   double _duration = 1;
   @override
@@ -14,7 +15,7 @@ class YearBarTile extends StatelessWidget {
             height: MediaQuery.of(context).size.height / 30,
             //color: Colors.amber,
             decoration: BoxDecoration(
-                color: Colors.pink, borderRadius: BorderRadius.circular(3.0)),
+                color: Colors.green, borderRadius: BorderRadius.circular(3.0)),
             duration: Duration(milliseconds: 1000),
             curve: Curves.fastOutSlowIn,
           ),
@@ -26,6 +27,6 @@ class YearBarTile extends StatelessWidget {
     // height: ,
     // width: (MediaQuery.of(context).size.width) / 12 * _duration,
     //child: BoxDecoration(borderRadius: BorderRadius.circular(10.0),color: Colors.amber),
-    //color: Colors.pink,
+    //color: Colors.green,
   }
 }

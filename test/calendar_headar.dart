@@ -7,7 +7,8 @@ class calendarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double _calendarWidth = MediaQuery.of(context).size.width / 12;
+    double _calendarWidth = 20;
+    //MediaQuery.of(context).size.width / 12;
     double _gap_calendars = _calendarWidth;
 
     return Padding(
@@ -20,19 +21,14 @@ class calendarHeader extends StatelessWidget {
                 top: 10,
                 left: 0.0 + i * (_gap_calendars * 1.2),
                 child: Image.asset(
-                  'assets/images/cals.png',
+                  'assets/images/cali.png',
                   width: _calendarWidth,
-
-                  //scale: (_calendarWidth * 1.1)
-                  // MediaQuery.of(context).size.width / 12
-                  //36,
                 )),
           for (int i = 0; i < 12; i++)
             Positioned(
               //bottom: 10,
               top: 20,
               left: 10.0 + i * _gap_calendars * 0.9,
-              //29.8,
 
               child: Text(
                 '${i + 1}',

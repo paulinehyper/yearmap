@@ -13,7 +13,7 @@ class MainBarTile extends StatelessWidget {
           height: MediaQuery.of(context).size.height / 25,
           //color: Colors.amber,
           decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(2.0)),
+              color: Colors.white, borderRadius: BorderRadius.circular(20.0)),
           duration: Duration(milliseconds: 1000),
           curve: Curves.fastOutSlowIn,
         ),
@@ -24,7 +24,7 @@ class MainBarTile extends StatelessWidget {
           height: MediaQuery.of(context).size.height / 25,
           //color: Colors.amber,
           decoration: BoxDecoration(
-              color: Colors.pink[100],
+              color: Colors.green[100],
               borderRadius: BorderRadius.circular(2.0)),
           duration: Duration(milliseconds: 1000),
           curve: Curves.fastOutSlowIn,
